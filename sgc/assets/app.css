@@ -1,0 +1,20 @@
+:root { --ledger:#203b32; --accent:#246451; --paper:#f6f5ef; }
+.stApp {background:var(--paper);}
+[data-testid="stMainBlockContainer"] {max-width:1360px;padding:3.5rem 3rem;}
+[data-testid="stSidebar"] {background:#e7ecdf;border-right:1px solid #c4cebc;}
+.wordmark {font:800 64px/1 Georgia,serif;letter-spacing:-5px;padding:16px 0 28px;}
+.wordmark span {display:block;font:10px/1.6 monospace;letter-spacing:2px;margin-top:14px;}
+.eyebrow {font:11px/1.5 monospace;letter-spacing:2px;color:var(--accent);margin:12px 0 20px;}
+h1 {font-family:Georgia,serif !important;font-size:clamp(2.2rem,4vw,3.8rem) !important;font-weight:500 !important;letter-spacing:-1.4px;line-height:1.12 !important;}
+h1.hero {font-size:clamp(3rem,5.6vw,5.5rem) !important;margin-top:12px;}
+h2,h3 {font-weight:550 !important;letter-spacing:-.5px;}
+.intro {max-width:450px;font-size:17px;line-height:1.8;color:#536857;margin:28px 0;}
+.ledger-note {border-top:1px solid #bac7b7;padding:20px 0;font:11px/1.9 monospace;letter-spacing:.4px;color:#536857;}
+[data-testid="stMetric"] {background:#e9ede4;border:1px solid #c4cebc;border-radius:4px;padding:20px 18px;}
+[data-testid="stMetricValue"] {font-family:Georgia,serif;font-weight:500;letter-spacing:-1px;}
+[data-testid="stForm"] {background:#fffef8;border:1px solid #c4cebc;border-radius:6px;padding:24px;}
+.stButton button,.stFormSubmitButton button {border-radius:4px;min-height:42px;}
+[data-testid="stDataFrame"] {border:1px solid #d0d8c9;}
+button:focus-visible,input:focus-visible {outline:3px solid #528c72 !important;outline-offset:2px;}
+@media(max-width:700px) {[data-testid="stMainBlockContainer"] {padding:2rem 1.1rem;} h1.hero {font-size:3.2rem !important;} [data-testid="stMetric"] {padding:14px;} }
+@media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none !important;transition:none !important;}}
