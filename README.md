@@ -1,16 +1,24 @@
+<div align="center">
+
 # SGC · Crediário
 
-### Cada parcela, uma história bem registrada.
+**Cada parcela, uma história bem registrada.**
 
-Aplicação local em Python para acompanhar vendas, estoque e recebimentos parcelados. A demonstração reúne o trabalho de quem vende, de quem recebe e de quem administra a operação, com permissões por perfil e dados separados por empresa.
+Vendas, estoque e recebimentos parcelados em uma aplicação local em Python, com permissões por
+perfil, dados separados por empresa e valores calculados em centavos.
 
-**Python · Streamlit · SQLAlchemy · SQLite · ReportLab · pytest**
+[![Testes](https://github.com/alex10presam-lang/sgc-crediario-Python/actions/workflows/tests.yml/badge.svg)](https://github.com/alex10presam-lang/sgc-crediario-Python/actions/workflows/tests.yml)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-246451?logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-SQLAlchemy-246451?logo=streamlit&logoColor=white)
+![Dados fictícios](https://img.shields.io/badge/demo-dados%20fict%C3%ADcios-e9ede4)
 
-[Executar](#executar-localmente) · [Experimentar](#um-roteiro-para-explorar) · [Arquitetura](docs/architecture.md) · [Testes](#qualidade-e-testes)
+[Executar](#executar-localmente) · [Roteiro](#um-roteiro-para-explorar) · [Arquitetura](docs/architecture.md) · [Testes](#qualidade-e-testes)
 
-![Painel do SGC com dados fictícios](docs/images/dashboard.png)
+</div>
 
-*Captura da aplicação em execução. Empresas, clientes, produtos e valores são fictícios.*
+<img src="docs/images/dashboard.png" alt="Painel do SGC com indicadores, agenda de recebimentos e carteira" width="100%">
+
+<sub>Captura da aplicação em execução. Empresas, clientes, produtos e valores são fictícios.</sub>
 
 ## O projeto
 
@@ -85,15 +93,23 @@ Esses acessos pertencem apenas à base fictícia criada localmente. Não são cr
 
 Os telefones e nomes são exemplos. Use apenas dados fictícios ao experimentar.
 
+### Telas
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/login.png" alt="Tela de acesso"><br><b>Acesso</b> — empresa, usuário e senha; cada perfil vê só o que pode operar.</td>
+    <td width="50%"><img src="docs/images/venda.png" alt="Formulário de nova venda"><br><b>Nova venda</b> — avulsa ou com produtos do estoque, entrada, parcelas e acréscimo único.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/cobranca.png" alt="Tabela de parcelas com situação colorida e formulário de recebimento"><br><b>Cobrança</b> — parcelas com situação destacada, pagamento parcial e comprovante.</td>
+    <td><img src="docs/images/estoque.png" alt="Estoque de produtos"><br><b>Estoque</b> — cadastro, reposição e baixa automática na venda.</td>
+  </tr>
+</table>
+
 <details>
-<summary>Ver acesso, venda e cobrança</summary>
-
-![Tela de acesso](docs/images/login.png)
-
-![Registro de venda](docs/images/venda.png)
-
-![Cobrança e recebimentos](docs/images/cobranca.png)
-
+<summary><b>Versão de celular</b> (390 px)</summary>
+<br>
+<img src="docs/images/mobile.png" alt="Painel do SGC em tela de celular" width="300">
 </details>
 
 ## Regras que orientam os cálculos
@@ -150,7 +166,7 @@ python -m ruff format --check sgc tests tools dashboard.py run.py
 
 Os testes cobrem cálculos em centavos, calendário, pagamento parcial, excedente, estorno, estoque concorrente, reenvio de operações, autenticação e isolamento de empresas. As telas também têm testes com `Streamlit AppTest`.
 
-O fluxo de integração contínua está em `.github/workflows/tests.yml`, para Python 3.12 no Linux. As imagens deste README foram capturadas no Edge; o painel foi conferido em largura de 390 px. O comprovante foi renderizado e inspecionado visualmente.
+O fluxo de integração contínua está em `.github/workflows/tests.yml`, para Python 3.12 no Linux. As imagens deste README foram capturadas com a demonstração em execução, em 1440 px e em 390 px. O comprovante foi renderizado e inspecionado visualmente.
 
 ## Dados, backup e publicação
 
