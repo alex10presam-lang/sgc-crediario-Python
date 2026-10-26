@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -57,6 +58,24 @@ def login(db):
         )
 
 
+MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+STATUS_STYLE = {
+    "Atrasada": "color:#9b2c1f;background-color:#f6e1dc;font-weight:600",
+    "Em aberto": "color:#7a5a12;background-color:#f6efd9",
+    "Quitada": "color:#1f5a46;background-color:#e1eee6",
+}
+
+
+def month_label(day):
+    return f"{MONTHS[day.month - 1]}/{day.strftime('%y')}"
+
+
+def styled_installments(rows):
+    """Tabela de parcelas com a situação destacada por cor."""
+    table = installment_table(rows)
+    return table.style.map(lambda value: STATUS_STYLE.get(value, ""), subset=["Situação"])
+
+
 def installment_table(rows):
     return pd.DataFrame(
         [
@@ -83,12 +102,13 @@ def overview(service):
         "Valores da empresa conectada, calculados a partir das parcelas e recebimentos registrados."
     )
     summary = service.summary()
-    for column, label, key in zip(
-        st.columns(4),
-        ["Total contratado", "Recebido", "A receber", "Em atraso"],
-        ["total", "paid", "balance", "overdue"],
-    ):
-        column.metric(label, brl(summary[key]))
+    with st.container(key="kpis"):
+        for column, label, key in zip(
+            st.columns(4),
+            ["Total contratado", "Recebido", "A receber", "Em atraso"],
+            ["total", "paid", "balance", "overdue"],
+        ):
+            column.metric(label, brl(summary[key]))
     st.divider()
     left, right = st.columns([1.5, 1])
     rows = service.installments()
@@ -98,16 +118,63 @@ def overview(service):
             monthly = {}
             for row in rows:
                 if row["balance"]:
-                    month = row["due_date"].strftime("%Y-%m")
-                    monthly[month] = monthly.get(month, 0) + row["balance"] / 100
+                    key = row["due_date"].replace(day=1)
+                    overdue = row["due_date"] < date.today()
+                    bucket = monthly.setdefault(key, {"balance": 0, "overdue": 0})
+                    bucket["overdue" if overdue else "balance"] += row["balance"]
             if monthly:
-                chart = pd.DataFrame(
-                    {
-                        "Mês": sorted(monthly),
-                        "Saldo (R$)": [monthly[m] for m in sorted(monthly)],
-                    }
-                ).set_index("Mês")
-                st.bar_chart(chart, color="#246451", height=280)
+                data = pd.DataFrame(
+                    [
+                        {
+                            "Mês": month_label(month),
+                            "Ordem": index,
+                            "Situação": situation,
+                            "Valor": cents / 100,
+                            "Saldo": brl(cents),
+                        }
+                        for index, month in enumerate(sorted(monthly))
+                        for situation, cents in (
+                            ("Em atraso", monthly[month]["overdue"]),
+                            ("A vencer", monthly[month]["balance"]),
+                        )
+                        if cents
+                    ]
+                )
+                chart = (
+                    alt.Chart(data)
+                    .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3, size=46)
+                    .encode(
+                        x=alt.X(
+                            "Mês:N",
+                            sort=alt.SortField("Ordem"),
+                            title=None,
+                            axis=alt.Axis(labelAngle=0, labelFontSize=12),
+                        ),
+                        y=alt.Y(
+                            "sum(Valor):Q",
+                            title=None,
+                            axis=alt.Axis(
+                                labelExpr="'R$ ' + replace(format(datum.value, ',.0f'), ',', '.')",
+                                tickCount=5,
+                                grid=True,
+                            ),
+                        ),
+                        color=alt.Color(
+                            "Situação:N",
+                            scale=alt.Scale(
+                                domain=["A vencer", "Em atraso"], range=["#246451", "#c0533f"]
+                            ),
+                            legend=alt.Legend(orient="top", title=None),
+                        ),
+                        tooltip=["Mês", "Situação", "Saldo"],
+                    )
+                    .properties(height=280)
+                    .configure_view(stroke=None)
+                    .configure_axis(
+                        domainColor="#c4cebc", gridColor="#e3e8dd", labelColor="#536857"
+                    )
+                )
+                st.altair_chart(chart, width="stretch")
             else:
                 st.success("Todos os valores registrados foram recebidos.")
         else:
@@ -124,7 +191,7 @@ def overview(service):
         )
     st.subheader("Carteira da empresa")
     if rows:
-        st.dataframe(installment_table(rows), hide_index=True, width="stretch")
+        st.dataframe(styled_installments(rows), hide_index=True, width="stretch")
 
 
 def customers_page(service, role):
@@ -226,14 +293,18 @@ def sale_page(service):
             total += product["price"] * quantity
         st.metric("Subtotal dos produtos", brl(total))
     with st.form("sale"):
-        customer = st.selectbox(
+        top_left, top_right = st.columns([1, 1.4])
+        customer = top_left.selectbox(
             "Cliente da venda",
             customers,
             format_func=lambda r: f"{r['name']} · #{r['id']}",
         )
-        description = st.text_input("Descrição da venda", max_chars=160)
+        description = top_right.text_input(
+            "Descrição da venda", max_chars=160, placeholder="Ex.: jogo de panelas"
+        )
+        price_col, entry_col = st.columns(2)
         amount = (
-            st.number_input(
+            price_col.number_input(
                 "Preço à vista (R$)",
                 min_value=0.01,
                 max_value=1_000_000.0,
@@ -243,20 +314,29 @@ def sale_page(service):
             if mode == "Venda avulsa"
             else total / 100
         )
+        if mode != "Venda avulsa":
+            price_col.caption(f"Preço à vista: soma dos produtos ({brl(total)}).")
+        entry = entry_col.number_input(
+            "Entrada (R$)", min_value=0.0, max_value=1_000_000.0, step=10.0
+        )
         cash = st.checkbox("Pagamento integral à vista")
-        entry = st.number_input("Entrada (R$)", min_value=0.0, max_value=1_000_000.0, step=10.0)
-        count = st.number_input("Número de parcelas", min_value=1, max_value=48, value=3, step=1)
-        first_due = st.date_input(
+        count_col, due_col, interest_col = st.columns(3)
+        count = count_col.number_input(
+            "Número de parcelas", min_value=1, max_value=48, value=3, step=1
+        )
+        first_due = due_col.date_input(
             "Primeiro vencimento",
             value=add_months(date.today(), 1),
             min_value=date.today(),
             max_value=date(2100, 12, 31),
+            format="DD/MM/YYYY",
         )
-        interest = st.number_input(
-            "Acréscimo único sobre o saldo financiado (%)",
+        interest = interest_col.number_input(
+            "Acréscimo único (%)",
             min_value=0.0,
             max_value=100.0,
             step=0.5,
+            help="Incide uma única vez sobre o saldo financiado, depois da entrada.",
         )
         st.caption(
             "À vista: entrada igual ao total, sem acréscimo. No crediário, o acréscimo informado incide uma única vez sobre o saldo após a entrada. Os centavos são distribuídos entre as parcelas."
@@ -287,7 +367,7 @@ def collections_page(service, role):
     rows = service.installments()
     open_rows = [r for r in rows if r["balance"]]
     if rows:
-        st.dataframe(installment_table(rows), hide_index=True, width="stretch")
+        st.dataframe(styled_installments(rows), hide_index=True, width="stretch")
     if open_rows:
 
         def labels(row):
@@ -319,6 +399,7 @@ def collections_page(service, role):
                     "Novo vencimento",
                     min_value=date.today(),
                     max_value=date(2100, 12, 31),
+                    format="DD/MM/YYYY",
                 )
                 if st.form_submit_button("Salvar vencimento"):
                     service.reschedule(selected["id"], due_date)
