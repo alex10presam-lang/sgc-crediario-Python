@@ -12,6 +12,13 @@ Aplicação local em Python para acompanhar vendas, estoque e recebimentos parce
 
 *Captura da aplicação em execução. Empresas, clientes, produtos e valores são fictícios.*
 
+## Leitura rápida do projeto
+
+- **Foco:** modelagem relacional, regras financeiras e organização de serviços em Python.
+- **Evidência técnica:** [modelos de dados](sgc/models.py), [regras de vendas e recebimentos](sgc/services.py) e [testes de transações](tests/test_transactions.py).
+- **Para avaliar:** siga o [roteiro da demonstração](#um-roteiro-para-explorar), registre um pagamento parcial e confira sua distribuição e o comprovante.
+- **Estado:** demonstração local com empresas e valores fictícios; sem integração bancária ou emissão fiscal.
+
 ## O projeto
 
 O SGC organiza uma rotina de crediário: cadastrar um cliente, registrar uma venda, dividir o saldo e acompanhar cada recebimento. A interface destaca o que já entrou, o que ainda falta receber e quais parcelas venceram.
