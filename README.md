@@ -6,18 +6,18 @@ Aplicação local em Python para acompanhar vendas, estoque e recebimentos parce
 
 **Python · Streamlit · SQLAlchemy · SQLite · ReportLab · pytest**
 
-[Executar](#executar-localmente) · [Experimentar](#um-roteiro-para-explorar) · [Arquitetura](docs/architecture.md) · [Testes](#qualidade-e-testes)
+## Como avaliar o projeto
+
+[Executar o SGC](#executar-localmente)
+
+Registre um pagamento parcial na base fictícia, confira o saldo que permanece em aberto e veja a distribuição do pagamento no comprovante PDF.
+
+- **Código e testes.** [modelos de dados](sgc/models.py), [regras de vendas e recebimentos](sgc/services.py) e [testes de transações](tests/test_transactions.py).
+- **Escopo.** Demonstração local com empresas e valores fictícios; sem integração bancária ou emissão fiscal.
 
 ![Painel do SGC com dados fictícios](docs/images/dashboard.png)
 
 *Captura da aplicação em execução. Empresas, clientes, produtos e valores são fictícios.*
-
-## Leitura rápida do projeto
-
-- **Foco:** modelagem relacional, regras financeiras e organização de serviços em Python.
-- **Evidência técnica:** [modelos de dados](sgc/models.py), [regras de vendas e recebimentos](sgc/services.py) e [testes de transações](tests/test_transactions.py).
-- **Para avaliar:** siga o [roteiro da demonstração](#um-roteiro-para-explorar), registre um pagamento parcial e confira sua distribuição e o comprovante.
-- **Estado:** demonstração local com empresas e valores fictícios; sem integração bancária ou emissão fiscal.
 
 ## O projeto
 
